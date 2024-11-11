@@ -20,7 +20,7 @@ const personSchema = new mongoose.Schema(
 
   { timestamps: true }
 );
-const person = new mongoose.model("person", personSchema);
+const person = mongoose.model("person", personSchema);
 //for creating new documents
 async function addPerson() {
   const personOne = await person.create({
@@ -61,15 +61,16 @@ async function addPeople() {
 //for searching a document
 async function findPeople() {
   const p = await person.find({
-    fullName: "Hauwa Salihu",
+    fullName: "Alan Turing",
   });
 
   console.log(p);
 }
+
 //for searching a document
 async function findPerson() {
-  const p = person.findOne({
-    favoritefoods: { $elemMatch: { field: "rice" } },
+  const p = await person.findOne({
+    favoritefoods: "tacos",
   });
 
   console.log(p);
@@ -78,6 +79,15 @@ async function findPerson() {
 async function findById() {
   const p = await person.findOne({ _id: "673200e62da2d2c46dc0a5f0" });
   console.log("user found successfully");
+  console.log(p);
+}
+//for finding by id
+async function classicUpdate() {
+  const p = await person.findOne({ _id: "673247d5c6de747a2898f34b" });
+  console.log("user found successfully");
+  p.favoritefoods.push("hamburger");
+  await p.save();
+  console.log("document updated successfully");
   console.log(p);
 }
 ///for updatin a contact
@@ -100,18 +110,22 @@ async function deletePerson() {
   console.log("user deleted successfully");
 } //for deleting a contact
 async function deletePeople() {
-  const peopleDocuments = [
-    {
-      fullName: "Ugo Maduekwe",
-    },
-    {
-      fullName: "Hauwa Salihu",
-    },
-  ];
   // Insert the documents into the specified collection
-  const p = await person.deleteMany(peopleDocuments);
+  const p = await person.deleteMany({ fullName: "Alan Turing" });
+  console.log(p);
 
   console.log("users deleted successfully");
+}
+//chaining methods
+async function methodChain() {
+  const peopleChain = await person
+    .find({ favoritefoods: "akpu" })
+    .sort("fullName")
+    .limit(2)
+    .select({ age: 0 })
+    .exec();
+
+  console.log(peopleChain);
 }
 //for establishing connection to mongodb
 async function connectToDatabase() {
@@ -119,7 +133,7 @@ async function connectToDatabase() {
     await mongoose.connect(process.env.MONGO_URI);
 
     console.log("Connected to database successfully");
-    await deletePeople();
+    await methodChain();
     console.log("Person added successfully");
   } catch (error) {
     console.log(error);
